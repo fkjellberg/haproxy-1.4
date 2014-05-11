@@ -2090,7 +2090,7 @@ int stats_dump_proxy(struct session *s, struct proxy *px, struct uri_auth *uri)
 					     svs->counters.down_trans, human_time(srv_downtime(sv), 1));
 				} else if (sv != svs)
 					chunk_printf(&msg,
-					     "<td class=ac colspan=3><a class=lfsb href=\"#%s/%s\">via %s/%s<a></td>",
+					     "<td class=ac colspan=3><a class=lfsb href=\"#%s/%s\">via %s/%s</a></td>",
 							svs->proxy->id, svs->id, svs->proxy->id, svs->id);
 				else
 					chunk_printf(&msg,
