@@ -50,7 +50,7 @@ struct hdr_exp {
 
 extern regmatch_t pmatch[MAX_MATCH];
 
-int exp_replace(char *dst, char *src, const char *str,	const regmatch_t *matches);
+int exp_replace(char *dst, unsigned int dst_size, char *src, const char *str, const regmatch_t *matches);
 const char *check_replace_string(const char *str);
 const char *chain_regex(struct hdr_exp **head, const regex_t *preg,
 			int action, const char *replace, void *cond);
