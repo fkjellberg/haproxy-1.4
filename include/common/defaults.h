@@ -43,6 +43,10 @@
 #define REQURI_LEN      1024
 #define CAPTURE_LEN     64
 
+#ifndef MAX_SYSLOG_LEN
+#define MAX_SYSLOG_LEN          1024
+#endif
+
 // maximum line size when parsing config
 #ifndef LINESIZE
 #define LINESIZE	2048
