@@ -42,8 +42,9 @@ one of the following choices to the CPU variable :
   - i686 for intel PentiumPro, Pentium 2 and above, AMD Athlon
   - i586 for intel Pentium, AMD K6, VIA C3.
   - ultrasparc : Sun UltraSparc I/II/III/IV processor
-  - native : use the build machine's specific processor optimizations
-  - generic : any other processor or no specific optimization. (default)
+  - native : use the build machine's specific processor optimizations. Use with
+    extreme care, and never in virtualized environments (known to break).
+  - generic : any other processor or no CPU-specific optimization. (default)
 
 Alternatively, you may just set the CPU_CFLAGS value to the optimal GCC options
 for your platform.
