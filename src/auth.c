@@ -232,7 +232,7 @@ check_user(struct userlist *ul, unsigned int group_mask, const char *user, const
 	fprintf(stderr, ", crypt=%s\n", ep);
 #endif
 
-	if (!strcmp(ep, u->pass))
+	if (ep && strcmp(ep, u->pass) == 0)
 		return 1;
 	else
 		return 0;
