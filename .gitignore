@@ -12,6 +12,8 @@ src/*.o
 *.log*
 *.trace*
 haproxy-*
+!doc/haproxy-*.txt
+!src/*.c
 make-*
 dlmalloc.c
 00*.patch
