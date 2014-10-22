@@ -4171,6 +4171,7 @@ void http_end_txn_clean_session(struct session *s)
 	s->rep->flags &= ~(BF_SHUTR|BF_SHUTR_NOW|BF_READ_ATTACHED|BF_READ_ERROR|BF_READ_NOEXP|BF_STREAMER|BF_STREAMER_FAST|BF_WRITE_PARTIAL|BF_NEVER_WAIT);
 	s->flags &= ~(SN_DIRECT|SN_ASSIGNED|SN_ADDR_SET|SN_BE_ASSIGNED|SN_FORCE_PRST|SN_IGNORE_PRST);
 	s->flags &= ~(SN_CURR_SESS|SN_REDIRECTABLE|SN_WAIT_CONN);
+	s->flags &= ~(SN_ERR_MASK|SN_FINST_MASK|SN_REDISP);
 	s->txn.meth = 0;
 	http_reset_txn(s);
 	s->txn.flags |= TX_NOT_FIRST | TX_WAIT_NEXT_RQ;
