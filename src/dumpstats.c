@@ -662,6 +662,22 @@ int stats_sock_parse_request(struct stream_interface *si, char *line)
 	return 1;
 }
 
+/* This is called when the stream interface is closed. For instance, upon an
+ * external abort, we won't call the i/o handler anymore so we may need to
+ * remove back references to the session currently being dumped.
+ */
+static void cli_release_handler(struct stream_interface *si)
+{
+	struct session *s = si->private;
+
+	if (si->st0 == STAT_CLI_O_SESS && s->data_state == DATA_ST_LIST) {
+		if (!LIST_ISEMPTY(&s->data_ctx.sess.bref.users)) {
+			LIST_DEL(&s->data_ctx.sess.bref.users);
+			LIST_INIT(&s->data_ctx.sess.bref.users);
+		}
+	}
+}
+
 /* This I/O handler runs as an applet embedded in a stream interface. It is
  * used to processes I/O from/to the stats unix socket. The system relies on a
  * state machine handling requests and various responses. We read a request,
@@ -767,6 +783,7 @@ void stats_io_handler(struct stream_interface *si)
 		}
 		else {	/* output functions: first check if the output buffer is closed then abort */
 			if (res->flags & (BF_SHUTR_NOW|BF_SHUTR)) {
+				cli_release_handler(si);
 				si->st0 = STAT_CLI_END;
 				continue;
 			}
@@ -789,6 +806,7 @@ void stats_io_handler(struct stream_interface *si)
 					si->st0 = STAT_CLI_PROMPT;
 				break;
 			default: /* abnormal state */
+				cli_release_handler(si);
 				si->st0 = STAT_CLI_PROMPT;
 				break;
 			}
