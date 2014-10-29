@@ -45,7 +45,15 @@ void stream_sock_chk_snd(struct stream_interface *si);
  */
 static inline int get_original_dst(int fd, struct sockaddr_in *sa, socklen_t *salen) {
 #if defined(TPROXY) && defined(SO_ORIGINAL_DST)
-    return getsockopt(fd, SOL_IP, SO_ORIGINAL_DST, (void *)sa, salen);
+	/* For TPROXY and Netfilter's NAT, we can retrieve the original
+	 * IPv4 address before DNAT/REDIRECT. We must not do that with
+	 * other families because v6-mapped IPv4 addresses are still
+	 * reported as v4.
+	 */
+	if (((struct sockaddr_storage *)sa)->ss_family == AF_INET)
+		return getsockopt(fd, SOL_IP, SO_ORIGINAL_DST, (void *)sa, salen);
+	else
+		return -1;
 #else
 #if defined(TPROXY) && defined(USE_GETSOCKNAME)
     return getsockname(fd, (struct sockaddr *)sa, salen);
