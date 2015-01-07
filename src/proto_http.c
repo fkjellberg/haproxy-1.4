@@ -4076,6 +4076,8 @@ int http_send_name_header(struct http_txn *txn, struct http_msg *msg, struct buf
 
 	/* Adjust buffer data length to send */
 	buf->send_max -= delta;
+	msg->eol -= delta;
+	msg->som -= delta;
 
 	return 0;
 }
