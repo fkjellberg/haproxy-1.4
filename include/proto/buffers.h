@@ -59,11 +59,17 @@ static inline void buffer_init(struct buffer *buf)
  */
 static inline int buffer_max_len(struct buffer *buf)
 {
+	unsigned int protected = global.tune.maxrewrite;
+
 	if (buf->to_forward == BUF_INFINITE_FORWARD ||
-	    buf->to_forward + buf->send_max >= global.tune.maxrewrite)
-		return buf->size;
+	    buf->to_forward >= protected ||
+	    buf->send_max >= protected ||
+	    buf->to_forward + buf->send_max >= protected)
+		protected = 0;
 	else
-		return buf->size - global.tune.maxrewrite + buf->to_forward + buf->send_max;
+		protected -= buf->to_forward + buf->send_max;
+
+	return buf->size - protected;
 }
 
 /* Check buffer timeouts, and set the corresponding flags. The
