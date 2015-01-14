@@ -61,13 +61,15 @@ static inline int buffer_max_len(struct buffer *buf)
 {
 	unsigned int protected = global.tune.maxrewrite;
 
-	if (buf->to_forward == BUF_INFINITE_FORWARD ||
-	    buf->to_forward >= protected ||
-	    buf->send_max >= protected ||
-	    buf->to_forward + buf->send_max >= protected)
-		protected = 0;
-	else
-		protected -= buf->to_forward + buf->send_max;
+	if (buf->cons->state == SI_ST_EST) {
+		if (buf->to_forward == BUF_INFINITE_FORWARD ||
+		    buf->to_forward >= protected ||
+		    buf->send_max >= protected ||
+		    buf->to_forward + buf->send_max >= protected)
+			protected = 0;
+		else
+			protected -= buf->to_forward + buf->send_max;
+	}
 
 	return buf->size - protected;
 }
