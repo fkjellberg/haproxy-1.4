@@ -767,6 +767,12 @@ static int event_srv_chk_w(int fd)
 				if (s->proxy->options2 & PR_O2_CHK_SNDST)
 					check_len += httpchk_build_status_header(s, trash + check_len);
 
+				/* prevent HTTP keep-alive when "http-check expect" is used */
+				if (s->proxy->options2 & PR_O2_EXP_TYPE) {
+					memcpy(trash + check_len, "Connection: close\r\n", 19);
+					check_len += 19;
+				}
+
 				trash[check_len++] = '\r';
 				trash[check_len++] = '\n';
 				trash[check_len] = '\0';
