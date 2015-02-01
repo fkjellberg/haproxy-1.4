@@ -1,6 +1,35 @@
 ChangeLog :
 ===========
 
+2015/02/01 : 1.4.26
+    - BUG/MINOR: stats: fix a typo on a closing tag for a server tracking another one
+    - BUG/MEDIUM: auth: fix segfault with http-auth and a configuration with an unknown encryption algorithm
+    - BUG/MEDIUM: config: userlists should ensure that encrypted passwords are supported
+    - BUG/MINOR: log: fix request flags when keep-alive is enabled
+    - BUG/MINOR: checks: prevent http keep-alive with http-check expect
+    - BUG/MEDIUM: backend: Update hash to use unsigned int throughout
+    - BUG/MINOR: http: fix typo: "401 Unauthorized" => "407 Unauthorized"
+    - BUG/MINOR: build: handle whitespaces in wc -l output
+    - DOC: httplog does not support 'no'
+    - BUG/MEDIUM: regex: fix risk of buffer overrun in exp_replace()
+    - BUILD: fix Makefile.bsd
+    - BUILD: also fix Makefile.osx
+    - BUG/MAJOR: http: fix again http-send-name-header
+    - BUG/MAJOR: buffer: fix possible integer overflow on reserved size computation
+    - BUG/MAJOR: buffer: don't schedule data in transit for leaving until connected
+    - BUG/MINOR: http: don't report server aborts as client aborts
+    - DOC: stop referencing the slow git repository in the README
+    - DOC: remove the ultra-obsolete TODO file
+    - BUILD: remove TODO from the spec file and add README
+    - MINOR: log: make MAX_SYSLOG_LEN overridable at build time
+    - DOC: remove references to CPU=native in the README
+    - BUG/MEDIUM: http: don't dump debug headers on MSG_ERROR
+    - BUG/MAJOR: cli: explicitly call cli_release_handler() upon error
+    - BUG/MEDIUM: tcp: don't use SO_ORIGINAL_DST on non-AF_INET sockets
+    - BUG/MINOR: config: don't inherit the default balance algorithm in frontends
+    - BUG/MEDIUM: http: fix header removal when previous header ends with pure LF
+    - BUG/MINOR: http: abort request processing on filter failure
+
 2014/03/27 : 1.4.25
     - DOC: typo: nosepoll self reference in config guide
     - BUG/MINOR: deinit: free fdinfo while doing cleanup
