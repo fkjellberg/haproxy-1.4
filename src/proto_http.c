@@ -2814,9 +2814,14 @@ int http_wait_for_request(struct session *s, struct buffer *req, int an_bit)
 		}
 	}
 
+	/* Chunked requests must have their content-length removed */
 	ctx.idx = 0;
-	while (!(txn->flags & TX_REQ_TE_CHNK) && !use_close_only &&
-	       http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx)) {
+	if (txn->flags & TX_REQ_TE_CHNK) {
+		while (http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx))
+			http_remove_header2(msg, req, &txn->hdr_idx, &ctx);
+	}
+	else while (!use_close_only &&
+	            http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx)) {
 		signed long long cl;
 
 		if (!ctx.vlen) {
@@ -5226,10 +5231,13 @@ int http_wait_for_response(struct session *s, struct buffer *rep, int an_bit)
 		}
 	}
 
-	/* FIXME: below we should remove the content-length header(s) in case of chunked encoding */
 	ctx.idx = 0;
-	while (!(txn->flags & TX_RES_TE_CHNK) && !use_close_only &&
-	       http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx)) {
+	if (txn->flags & TX_RES_TE_CHNK) {
+		while (http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx))
+			http_remove_header2(msg, rep, &txn->hdr_idx, &ctx);
+	}
+	else while (!use_close_only &&
+	            http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx)) {
 		signed long long cl;
 
 		if (!ctx.vlen) {
