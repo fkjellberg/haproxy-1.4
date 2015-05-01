@@ -5284,12 +5284,11 @@ int http_wait_for_response(struct session *s, struct buffer *rep, int an_bit)
 	}
 
 	ctx.idx = 0;
-	if (txn->flags & TX_RES_TE_CHNK) {
+	if (use_close_only || (txn->flags & TX_RES_TE_CHNK)) {
 		while (http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx))
 			http_remove_header2(msg, rep, &txn->hdr_idx, &ctx);
 	}
-	else while (!use_close_only &&
-	            http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx)) {
+	else while (http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx)) {
 		signed long long cl;
 
 		if (!ctx.vlen) {
