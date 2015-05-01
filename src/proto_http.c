@@ -2382,7 +2382,6 @@ int http_wait_for_request(struct session *s, struct buffer *req, int an_bit)
 	 */
 
 	int cur_idx;
-	int use_close_only;
 	struct http_txn *txn = &s->txn;
 	struct http_msg *msg = &txn->req;
 	struct hdr_ctx ctx;
@@ -2830,17 +2829,14 @@ int http_wait_for_request(struct session *s, struct buffer *req, int an_bit)
 	 *       connection.
 	 */
 
-	use_close_only = 0;
 	ctx.idx = 0;
 	/* set TE_CHNK and XFER_LEN only if "chunked" is seen last */
 	while (http_find_header2("Transfer-Encoding", 17, msg->sol, &txn->hdr_idx, &ctx)) {
 		if (ctx.vlen == 7 && strncasecmp(ctx.line + ctx.val, "chunked", 7) == 0)
 			txn->flags |= (TX_REQ_TE_CHNK | TX_REQ_XFER_LEN);
 		else if (txn->flags & TX_REQ_TE_CHNK) {
-			/* bad transfer-encoding (chunked followed by something else) */
-			use_close_only = 1;
-			txn->flags &= ~(TX_REQ_TE_CHNK | TX_REQ_XFER_LEN);
-			break;
+			/* chunked not last, return badreq */
+			goto return_bad_req;
 		}
 	}
 
@@ -2850,8 +2846,7 @@ int http_wait_for_request(struct session *s, struct buffer *req, int an_bit)
 		while (http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx))
 			http_remove_header2(msg, req, &txn->hdr_idx, &ctx);
 	}
-	else while (!use_close_only &&
-	            http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx)) {
+	else while (http_find_header2("Content-Length", 14, msg->sol, &txn->hdr_idx, &ctx)) {
 		signed long long cl;
 
 		if (!ctx.vlen) {
@@ -2878,9 +2873,8 @@ int http_wait_for_request(struct session *s, struct buffer *req, int an_bit)
 		msg->body_len = msg->chunk_len = cl;
 	}
 
-	/* bodyless requests have a known length */
-	if (!use_close_only)
-		txn->flags |= TX_REQ_XFER_LEN;
+	/* even bodyless requests have a known length */
+	txn->flags |= TX_REQ_XFER_LEN;
 
 	/* end of job, return OK */
 	req->analysers &= ~an_bit;
