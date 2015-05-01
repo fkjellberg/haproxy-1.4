@@ -2729,6 +2729,25 @@ int http_wait_for_request(struct session *s, struct buffer *req, int an_bit)
 	if (unlikely(msg->sl.rq.v_l == 0) && !http_upgrade_v09_to_v10(req, msg, txn))
 		goto return_bad_req;
 
+	/* RFC7230#2.6 has enforced the format of the HTTP version string to be
+	 * exactly one digit "." one digit. This check may be disabled using
+	 * option accept-invalid-http-request.
+	 */
+	if (!(s->fe->options2 & PR_O2_REQBUG_OK)) {
+		if (msg->sl.rq.v_l != 8) {
+			msg->err_pos = msg->sl.rq.v;
+			goto return_bad_req;
+		}
+
+		if (msg->sol[msg->sl.rq.v + 4] != '/' ||
+		    !isdigit((unsigned char)msg->sol[msg->sl.rq.v + 5]) ||
+		    msg->sol[msg->sl.rq.v + 6] != '.' ||
+		    !isdigit((unsigned char)msg->sol[msg->sl.rq.v + 7])) {
+			msg->err_pos = msg->sl.rq.v + 4;
+			goto return_bad_req;
+		}
+	}
+
 	/* ... and check if the request is HTTP/1.1 or above */
 	if ((msg->sl.rq.v_l == 8) &&
 	    ((msg->sol[msg->sl.rq.v + 5] > '1') ||
@@ -5124,6 +5143,25 @@ int http_wait_for_response(struct session *s, struct buffer *rep, int an_bit)
 		n = 0;
 	if (s->srv)
 		s->srv->counters.p.http.rsp[n]++;
+
+	/* RFC7230#2.6 has enforced the format of the HTTP version string to be
+	 * exactly one digit "." one digit. This check may be disabled using
+	 * option accept-invalid-http-response.
+	 */
+	if (!(s->be->options2 & PR_O2_RSPBUG_OK)) {
+		if (msg->sl.st.v_l != 8) {
+			msg->err_pos = 0;
+			goto hdr_response_bad;
+		}
+
+		if (msg->sol[4] != '/' ||
+		    !isdigit((unsigned char)msg->sol[5]) ||
+		    msg->sol[6] != '.' ||
+		    !isdigit((unsigned char)msg->sol[7])) {
+			msg->err_pos = 4;
+			goto hdr_response_bad;
+		}
+	}
 
 	/* check if the response is HTTP/1.1 or above */
 	if ((msg->sl.st.v_l == 8) &&
