@@ -2833,8 +2833,7 @@ int http_wait_for_request(struct session *s, struct buffer *req, int an_bit)
 	use_close_only = 0;
 	ctx.idx = 0;
 	/* set TE_CHNK and XFER_LEN only if "chunked" is seen last */
-	while ((txn->flags & TX_REQ_VER_11) &&
-	       http_find_header2("Transfer-Encoding", 17, msg->sol, &txn->hdr_idx, &ctx)) {
+	while (http_find_header2("Transfer-Encoding", 17, msg->sol, &txn->hdr_idx, &ctx)) {
 		if (ctx.vlen == 7 && strncasecmp(ctx.line + ctx.val, "chunked", 7) == 0)
 			txn->flags |= (TX_REQ_TE_CHNK | TX_REQ_XFER_LEN);
 		else if (txn->flags & TX_REQ_TE_CHNK) {
@@ -5279,8 +5278,7 @@ int http_wait_for_response(struct session *s, struct buffer *rep, int an_bit)
 
 	use_close_only = 0;
 	ctx.idx = 0;
-	while ((txn->flags & TX_RES_VER_11) &&
-	       http_find_header2("Transfer-Encoding", 17, msg->sol, &txn->hdr_idx, &ctx)) {
+	while (http_find_header2("Transfer-Encoding", 17, msg->sol, &txn->hdr_idx, &ctx)) {
 		if (ctx.vlen == 7 && strncasecmp(ctx.line + ctx.val, "chunked", 7) == 0)
 			txn->flags |= (TX_RES_TE_CHNK | TX_RES_XFER_LEN);
 		else if (txn->flags & TX_RES_TE_CHNK) {
