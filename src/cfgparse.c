@@ -2850,7 +2850,7 @@ stats_error_parsing:
 				if (!strcmp(args[2], "clf")) {
 					curproxy->options2 |= PR_O2_CLFLOG;
 				} else {
-					Alert("parsing [%s:%d] : keyword '%s' only supports option 'clf'.\n", file, linenum, args[2]);
+					Alert("parsing [%s:%d] : keyword '%s' only supports option 'clf'.\n", file, linenum, args[1]);
 					err_code |= ERR_ALERT | ERR_FATAL;
 					goto out;
 				}
