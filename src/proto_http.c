@@ -302,7 +302,7 @@ const struct http_method_desc http_methods[26][3] = {
 		[0] = {	.meth = HTTP_METH_TRACE   , .len=5, .text="TRACE"   },
 	},
 	/* rest is empty like this :
-	 *      [1] = {	.meth = HTTP_METH_NONE    , .len=0, .text=""        },
+	 *      [0] = {	.meth = HTTP_METH_OTHER   , .len=0, .text=""        },
 	 */
 };
 
@@ -681,8 +681,8 @@ struct chunk *error_message(struct session *s, int msgnum)
 }
 
 /*
- * returns HTTP_METH_NONE if there is nothing valid to read (empty or non-text
- * string), HTTP_METH_OTHER for unknown methods, or the identified method.
+ * returns a known method among HTTP_METH_* or HTTP_METH_OTHER for all unknown
+ * ones.
  */
 static http_meth_t find_http_meth(const char *str, const int len)
 {
@@ -698,10 +698,8 @@ static http_meth_t find_http_meth(const char *str, const int len)
 			if (likely(memcmp(str, h->text, h->len) == 0))
 				return h->meth;
 		};
-		return HTTP_METH_OTHER;
 	}
-	return HTTP_METH_NONE;
-
+	return HTTP_METH_OTHER;
 }
 
 /* Parse the URI from the given transaction (which is assumed to be in request

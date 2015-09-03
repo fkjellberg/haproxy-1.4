@@ -236,7 +236,6 @@ enum {
 
 /* Known HTTP methods */
 typedef enum {
-	HTTP_METH_NONE = 0,
 	HTTP_METH_OPTIONS,
 	HTTP_METH_GET,
 	HTTP_METH_HEAD,
