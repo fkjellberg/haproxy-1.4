@@ -1442,7 +1442,8 @@ resync_stream_interface:
 
 		/* Now we can add the server name to a header (if requested) */
 		/* check for HTTP mode and proxy server_name_hdr_name != NULL */
-		if ((s->flags & SN_BE_ASSIGNED) &&
+		if (s->si[1].state >= SI_ST_CON && s->si[1].state < SI_ST_CLO &&
+		    (s->flags & SN_BE_ASSIGNED) &&
 		    (s->be->mode == PR_MODE_HTTP) &&
 		    (s->be->server_id_hdr_name != NULL) &&
 		    (s->srv)) {
