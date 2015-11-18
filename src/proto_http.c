@@ -4297,6 +4297,13 @@ int http_sync_req_state(struct session *s)
 		if (!(s->be->options & PR_O_ABRT_CLOSE) && txn->meth != HTTP_METH_POST)
 			buffer_dont_read(buf);
 
+		/* In any case we've finished parsing the request so we must
+		 * disable Nagle when sending data because 1) we're not going
+		 * to shut this side, and 2) the server is waiting for us to
+		 * send pending data.
+		 */
+		buf->flags |= BF_NEVER_WAIT;
+
 		if (txn->rsp.msg_state == HTTP_MSG_ERROR)
 			goto wait_other_side;
 
@@ -4311,7 +4318,6 @@ int http_sync_req_state(struct session *s)
 			/* if any side switches to tunnel mode, the other one does too */
 			buffer_auto_read(buf);
 			txn->req.msg_state = HTTP_MSG_TUNNEL;
-			buf->flags |= BF_NEVER_WAIT;
 			goto wait_other_side;
 		}
 
@@ -4345,7 +4351,6 @@ int http_sync_req_state(struct session *s)
 			 */
 			buffer_auto_read(buf);
 			txn->req.msg_state = HTTP_MSG_TUNNEL;
-			buf->flags |= BF_NEVER_WAIT;
 		}
 
 		if (buf->flags & (BF_SHUTW|BF_SHUTW_NOW)) {
